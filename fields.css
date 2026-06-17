@@ -1,0 +1,577 @@
+/* =================================================================
+   FIELD — a form-field mini design system
+   -----------------------------------------------------------------
+   Layers:
+     1. Tokens          design decisions as variables
+     2. Reset / base    sane defaults
+     3. Layout          page chrome (wrap, panels, header)
+     4. Field primitive label + control + hint + error scaffold
+     5. Controls        text, select, date, file, textarea
+     6. Choices         radio, checkbox, switch
+     7. States          :focus, :invalid, :checked, disabled, error
+     8. Buttons
+     9. Utilities + reduced motion
+   ================================================================= */
+
+/* ---------- 1. TOKENS ---------- */
+:root {
+  /* color — light theme */
+  --bg:        #f6f7f9;
+  --surface:   #ffffff;
+  --surface-2: #f1f3f6;
+  --text:      #1a1f29;
+  --text-soft: #5a6373;
+  --muted:     #8a93a3;
+  --border:    #d4d9e0;
+  --border-strong: #b6bdc9;
+
+  --accent:      #4f46e5;
+  --accent-soft: #eef0fe;
+  --accent-ring: rgba(79, 70, 229, 0.30);
+
+  --danger:      #d22d3d;
+  --danger-soft: #fdecee;
+  --danger-ring: rgba(210, 45, 61, 0.28);
+
+  --success:     #1f9d63;
+
+  /* spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* radii */
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* type */
+  --font: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --fs-sm:   0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-lg:   1.125rem;
+
+  /* control sizing — single source of truth for height/feel */
+  --control-h:      2.75rem;
+  --control-px:     0.875rem;
+  --control-border: 1.5px;
+
+  /* elevation */
+  --shadow-sm: 0 1px 2px rgba(20, 25, 35, 0.06);
+  --shadow:    0 6px 24px rgba(20, 25, 35, 0.08);
+
+  /* motion */
+  --t-fast: 120ms ease;
+  --t:      180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* dark theme — same tokens, remapped */
+[data-theme="dark"] {
+  --bg:        #0f1320;
+  --surface:   #171c2b;
+  --surface-2: #1f2536;
+  --text:      #eef1f7;
+  --text-soft: #aab3c5;
+  --muted:     #7b8499;
+  --border:    #2c3346;
+  --border-strong: #3d4659;
+
+  --accent:      #8b85ff;
+  --accent-soft: #232544;
+  --accent-ring: rgba(139, 133, 255, 0.35);
+
+  --danger:      #ff6b78;
+  --danger-soft: #34202a;
+  --danger-ring: rgba(255, 107, 120, 0.30);
+
+  --success:     #4dd599;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow:    0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- 2. RESET / BASE ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--t), color var(--t);
+}
+
+h1, h2, h3, p { margin: 0; }
+
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--surface-2);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  color: var(--text-soft);
+}
+
+/* Visible, consistent focus for keyboard users everywhere */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: -3rem;
+  background: var(--accent);
+  color: #fff;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  z-index: 10;
+  transition: top var(--t-fast);
+}
+.skip-link:focus { top: var(--space-3); }
+
+/* ---------- 3. LAYOUT ---------- */
+.wrap {
+  width: min(720px, 100% - 2.5rem);
+  margin-inline: auto;
+}
+
+.page-header {
+  padding: var(--space-7) 0 var(--space-6);
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+}
+.page-header h1 {
+  font-size: clamp(2.25rem, 6vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.lede {
+  max-width: 56ch;
+  margin-top: var(--space-3);
+  color: var(--text-soft);
+  font-size: var(--fs-lg);
+}
+.theme-toggle { margin-top: var(--space-5); }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  margin-bottom: var(--space-5);
+}
+.panel__head { margin-bottom: var(--space-5); }
+.panel__head h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.muted { color: var(--muted); font-size: var(--fs-sm); margin-top: var(--space-1); }
+
+.page-footer {
+  padding: var(--space-6) 0 var(--space-7);
+  text-align: center;
+}
+
+/* ---------- 4. FIELD PRIMITIVE ---------- */
+.form { display: grid; gap: var(--space-5); }
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  border: 0;        /* fieldset reset */
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.field__label {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+.field__req { color: var(--danger); margin-left: 2px; }
+
+.field__hint {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.field__error {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.field__error::before {
+  content: "!";
+  display: inline-grid;
+  place-items: center;
+  width: 1.05em;
+  height: 1.05em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  border-radius: var(--radius-pill);
+  flex: none;
+}
+.field__error[hidden] { display: none; }
+
+/* ---------- 5. CONTROLS (text, select, date, textarea) ---------- */
+.control {
+  width: 100%;
+  min-height: var(--control-h);
+  padding: 0 var(--control-px);
+  font: inherit;
+  font-size: var(--fs-base);
+  color: var(--text);
+  background: var(--surface);
+  border: var(--control-border) solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+  appearance: none;
+}
+.control::placeholder { color: var(--muted); }
+
+textarea.control {
+  padding: var(--space-3) var(--control-px);
+  line-height: 1.55;
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.control:hover:not(:disabled):not(:read-only) {
+  border-color: var(--border-strong);
+}
+
+/* Select — custom chevron, native control underneath */
+.select { position: relative; display: grid; }
+.select .control { padding-right: 2.5rem; cursor: pointer; }
+.select__chevron {
+  position: absolute;
+  right: var(--control-px);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-soft);
+  pointer-events: none;
+  font-size: 0.9em;
+  transition: transform var(--t-fast);
+}
+.select:focus-within .select__chevron { transform: translateY(-50%) rotate(180deg); }
+
+/* Date — normalize the native picker icon tint */
+input[type="date"].control { cursor: pointer; }
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--t-fast);
+}
+input[type="date"]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* File — fully styled trigger wrapping a hidden native input */
+.file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-h);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-1);
+  border: var(--control-border) dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.file:hover { border-color: var(--accent); background: var(--accent-soft); }
+.file__btn {
+  flex: none;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+.file__name {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file.has-file .file__name { color: var(--text); font-weight: 500; }
+/* visually hide the native input but keep it operable + focusable */
+.file__input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.file:focus-within {
+  border-color: var(--accent);
+  border-style: solid;
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+
+/* ---------- 6. CHOICES (radio, checkbox, switch) ---------- */
+.field--group { gap: var(--space-3); }
+.choices { display: grid; gap: var(--space-2); }
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--fs-base);
+}
+
+/* hide native input but keep it in the a11y tree + keyboard reachable */
+.choice__input {
+  position: absolute;
+  opacity: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  cursor: pointer;
+}
+.choice__control {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: var(--control-border) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+}
+.choice__control--check { border-radius: var(--radius-sm); }
+
+/* radio dot */
+.choice__control::after {
+  content: "";
+  width: 0.6rem; height: 0.6rem;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  transform: scale(0);
+  transition: transform var(--t);
+}
+/* checkbox tick */
+.choice__control--check::after {
+  content: "";
+  width: 0.34rem; height: 0.62rem;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  border-radius: 1px;
+  background: none;
+  transform: rotate(45deg) scale(0);
+  margin-top: -2px;
+}
+
+/* :checked — drive the visual control from the real input */
+.choice__input:checked + .choice__control {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.choice__input:checked + .choice__control::after { transform: scale(1); }
+.choice__input:checked + .choice__control--check::after { transform: rotate(45deg) scale(1); }
+
+/* :focus-visible — ring on the visual control */
+.choice__input:focus-visible + .choice__control {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.choice:hover .choice__input:not(:checked):not(:disabled) + .choice__control {
+  border-color: var(--accent);
+}
+.choice__input:disabled ~ * { opacity: 0.5; cursor: not-allowed; }
+
+/* Switch — same pattern, pill geometry */
+.switch { display: inline-flex; align-items: center; gap: var(--space-3); cursor: pointer; }
+.switch__input {
+  position: absolute; opacity: 0; width: 2.5rem; height: 1.5rem; margin: 0; cursor: pointer;
+}
+.switch__track {
+  position: relative;
+  width: 2.75rem; height: 1.5rem;
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: background var(--t);
+  flex: none;
+}
+.switch__thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 1.125rem; height: 1.125rem;
+  background: #fff;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t);
+}
+.switch__input:checked + .switch__track { background: var(--accent); }
+.switch__input:checked + .switch__track .switch__thumb { transform: translateX(1.25rem); }
+.switch__input:focus-visible + .switch__track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+
+/* ---------- 7. STATES (focus / invalid / error / disabled) ---------- */
+
+/* focus — accent border + soft ring. .is-focus-demo pins it for the gallery */
+.control:focus,
+.control.is-focus-demo {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+  background: var(--surface);
+}
+
+/* invalid — only after the field has been interacted with (see :user-invalid),
+   plus an explicit hook for JS-driven and aria-invalid errors */
+.control:user-invalid,
+.control[aria-invalid="true"],
+.field.is-error .control {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+.control:user-invalid:focus,
+.control[aria-invalid="true"]:focus,
+.field.is-error .control:focus {
+  box-shadow: 0 0 0 4px var(--danger-ring);
+}
+
+/* disabled / read-only */
+.control:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: not-allowed;
+  border-style: dashed;
+}
+.control:read-only:not(:disabled) {
+  background: var(--surface-2);
+  cursor: default;
+}
+
+/* ---------- 8. BUTTONS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-h);
+  padding: 0 var(--space-5);
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--fs-base);
+  border-radius: var(--radius);
+  border: var(--control-border) solid transparent;
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn--primary:hover { filter: brightness(1.07); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn--ghost:hover { background: var(--surface-2); border-color: var(--border-strong); }
+
+.form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.form__status { font-size: var(--fs-sm); font-weight: 500; }
+.form__status.is-ok { color: var(--success); }
+.form__status.is-bad { color: var(--danger); }
+
+.theme-toggle__icon { font-size: 1.1em; }
+
+/* ---------- GALLERY + TOKENS ---------- */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+.gallery__cell {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  align-content: start;
+}
+.gallery__tag {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-soft);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.gallery__cell .control { background: var(--surface); }
+
+.tokens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+.token { display: flex; align-items: center; gap: var(--space-2); }
+.token__swatch {
+  width: 1.5rem; height: 1.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  flex: none;
+}
+.token__ramp {
+  width: 1.5rem; height: 1.5rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  border: 1px solid var(--border);
+  flex: none;
+}
+
+/* ---------- 9. REDUCED MOTION ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

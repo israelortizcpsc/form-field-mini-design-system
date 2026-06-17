@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Field — A Form-Field Mini Design System</title>
+  <meta name="description" content="A small, accessible, reusable set of styled form controls and their states." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="fields.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="page-header">
+    <div class="wrap">
+      <p class="eyebrow">Mini Design System</p>
+      <h1>Field</h1>
+      <p class="lede">
+        A small, accessible, reusable set of form controls — text, select, radio,
+        date, and file inputs — with first-class <code>:focus</code>,
+        <code>:invalid</code>, <code>:checked</code>, and error states. One source of
+        truth, reused everywhere.
+      </p>
+      <div class="theme-toggle">
+        <button type="button" id="themeBtn" class="btn btn--ghost" aria-pressed="false">
+          <span class="theme-toggle__icon" aria-hidden="true">◐</span>
+          <span class="theme-toggle__label">Toggle theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <!-- ============ THE LIVE FORM ============ -->
+    <section class="panel" aria-labelledby="demo-title">
+      <header class="panel__head">
+        <h2 id="demo-title">The controls, in context</h2>
+        <p class="muted">A real form built only from the system below. Try submitting it empty.</p>
+      </header>
+
+      <form class="form" id="demoForm" novalidate>
+        <!-- Text -->
+        <div class="field">
+          <label class="field__label" for="fullName">
+            Full name <span class="field__req" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="control"
+            type="text"
+            id="fullName"
+            name="fullName"
+            placeholder="Ada Lovelace"
+            autocomplete="name"
+            required
+            aria-describedby="fullName-hint fullName-err"
+          />
+          <p class="field__hint" id="fullName-hint">As it appears on your ID.</p>
+          <p class="field__error" id="fullName-err" hidden>Please enter your full name.</p>
+        </div>
+
+        <!-- Email (invalid-state demo) -->
+        <div class="field">
+          <label class="field__label" for="email">
+            Email <span class="field__req" aria-hidden="true">*</span>
+          </label>
+          <input
+            class="control"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+            aria-describedby="email-hint email-err"
+          />
+          <p class="field__hint" id="email-hint">We'll only use this to contact you.</p>
+          <p class="field__error" id="email-err" hidden>Enter a valid email address.</p>
+        </div>
+
+        <!-- Select -->
+        <div class="field">
+          <label class="field__label" for="role">Role</label>
+          <div class="select">
+            <select class="control" id="role" name="role" aria-describedby="role-hint">
+              <option value="" disabled selected>Choose a role…</option>
+              <option value="design">Designer</option>
+              <option value="eng">Engineer</option>
+              <option value="pm">Product Manager</option>
+              <option value="other">Other</option>
+            </select>
+            <span class="select__chevron" aria-hidden="true">▾</span>
+          </div>
+          <p class="field__hint" id="role-hint">Pick the closest match.</p>
+        </div>
+
+        <!-- Date -->
+        <div class="field">
+          <label class="field__label" for="start">Start date</label>
+          <input
+            class="control"
+            type="date"
+            id="start"
+            name="start"
+            aria-describedby="start-hint"
+          />
+          <p class="field__hint" id="start-hint">When can you begin?</p>
+        </div>
+
+        <!-- Radio group -->
+        <fieldset class="field field--group">
+          <legend class="field__label">Preferred contact</legend>
+          <div class="choices">
+            <label class="choice">
+              <input class="choice__input" type="radio" name="contact" value="email" checked />
+              <span class="choice__control" aria-hidden="true"></span>
+              <span class="choice__text">Email</span>
+            </label>
+            <label class="choice">
+              <input class="choice__input" type="radio" name="contact" value="phone" />
+              <span class="choice__control" aria-hidden="true"></span>
+              <span class="choice__text">Phone</span>
+            </label>
+            <label class="choice">
+              <input class="choice__input" type="radio" name="contact" value="none" />
+              <span class="choice__control" aria-hidden="true"></span>
+              <span class="choice__text">Don't contact me</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Checkbox -->
+        <fieldset class="field field--group">
+          <legend class="field__label">Interests</legend>
+          <div class="choices">
+            <label class="choice">
+              <input class="choice__input choice__input--check" type="checkbox" name="interest" value="systems" />
+              <span class="choice__control choice__control--check" aria-hidden="true"></span>
+              <span class="choice__text">Design systems</span>
+            </label>
+            <label class="choice">
+              <input class="choice__input choice__input--check" type="checkbox" name="interest" value="a11y" />
+              <span class="choice__control choice__control--check" aria-hidden="true"></span>
+              <span class="choice__text">Accessibility</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- File -->
+        <div class="field">
+          <label class="field__label" for="resume">Résumé</label>
+          <label class="file" for="resume">
+            <span class="file__btn">Choose file</span>
+            <span class="file__name" id="resume-name">No file selected</span>
+            <input
+              class="file__input"
+              type="file"
+              id="resume"
+              name="resume"
+              accept=".pdf,.doc,.docx"
+              aria-describedby="resume-hint"
+            />
+          </label>
+          <p class="field__hint" id="resume-hint">PDF or Word, up to 5&nbsp;MB.</p>
+        </div>
+
+        <!-- Textarea -->
+        <div class="field">
+          <label class="field__label" for="notes">Anything else?</label>
+          <textarea
+            class="control"
+            id="notes"
+            name="notes"
+            rows="4"
+            placeholder="Optional message…"
+          ></textarea>
+        </div>
+
+        <div class="form__actions">
+          <button type="submit" class="btn btn--primary">Submit application</button>
+          <button type="reset" class="btn btn--ghost">Reset</button>
+          <span class="form__status" id="formStatus" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ STATE GALLERY ============ -->
+    <section class="panel" aria-labelledby="states-title">
+      <header class="panel__head">
+        <h2 id="states-title">Every state, side by side</h2>
+        <p class="muted">The same control, pinned to each state so the system is self-documenting.</p>
+      </header>
+
+      <div class="gallery">
+        <div class="gallery__cell">
+          <p class="gallery__tag">Default</p>
+          <input class="control" type="text" value="Hello" aria-label="Default text input" />
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">:focus</p>
+          <input class="control is-focus-demo" type="text" value="Focused" aria-label="Focused text input" />
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">:invalid / error</p>
+          <input class="control" type="email" value="not-an-email" aria-invalid="true" aria-label="Invalid text input" />
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">Disabled</p>
+          <input class="control" type="text" value="Disabled" disabled aria-label="Disabled text input" />
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">Read-only</p>
+          <input class="control" type="text" value="Read only" readonly aria-label="Read-only text input" />
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">:checked (radio)</p>
+          <label class="choice">
+            <input class="choice__input" type="radio" name="g-radio" checked />
+            <span class="choice__control" aria-hidden="true"></span>
+            <span class="choice__text">Selected</span>
+          </label>
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">:checked (checkbox)</p>
+          <label class="choice">
+            <input class="choice__input choice__input--check" type="checkbox" name="g-check" checked />
+            <span class="choice__control choice__control--check" aria-hidden="true"></span>
+            <span class="choice__text">On</span>
+          </label>
+        </div>
+
+        <div class="gallery__cell">
+          <p class="gallery__tag">Switch</p>
+          <label class="switch">
+            <input class="switch__input" type="checkbox" checked />
+            <span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span>
+            <span class="choice__text">Notifications</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TOKENS ============ -->
+    <section class="panel" aria-labelledby="tokens-title">
+      <header class="panel__head">
+        <h2 id="tokens-title">Design tokens</h2>
+        <p class="muted">Everything above is driven by these CSS custom properties.</p>
+      </header>
+
+      <div class="tokens">
+        <div class="token"><span class="token__swatch" style="background:var(--accent)"></span><code>--accent</code></div>
+        <div class="token"><span class="token__swatch" style="background:var(--danger)"></span><code>--danger</code></div>
+        <div class="token"><span class="token__swatch" style="background:var(--surface)"></span><code>--surface</code></div>
+        <div class="token"><span class="token__swatch" style="background:var(--border)"></span><code>--border</code></div>
+        <div class="token"><span class="token__swatch" style="background:var(--text)"></span><code>--text</code></div>
+        <div class="token"><span class="token__ramp"></span><code>--radius / --space</code></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="wrap">
+      <p class="muted">Field — a reusable form-control foundation. The basis for CraneForms.</p>
+    </div>
+  </footer>
+
+  <script src="fields.js"></script>
+</body>
+</html>
