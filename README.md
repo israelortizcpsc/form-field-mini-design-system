@@ -32,8 +32,8 @@ No build step, no dependencies. Just open `index.html`.
 Clone and open the page directly in a browser:
 
 ```sh
-git clone https://github.com/israelortizcpsc/MiniSys.git
-cd MiniSys
+git clone https://github.com/israelortizcpsc/form-field-mini-design-system.git
+cd form-field-mini-design-system
 # open index.html in your browser, or serve it:
 python -m http.server 8000   # then visit http://localhost:8000
 ```
